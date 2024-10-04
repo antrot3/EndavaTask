@@ -1,33 +1,74 @@
+using Endava.Data;
+using Endava.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Endava.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    [Route("api/[controller]")]
+    public class ArticlesController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+        private readonly ApplicationDbContext _dbContext;
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public ArticlesController(ILogger<ArticlesController> logger, ApplicationDbContext dbContext)
         {
-            _logger = logger;
+            _dbContext = dbContext;
         }
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        [Authorize(Roles = "Admin")]
+        [HttpPost("new")]
+        public async Task<ActionResult<Article>> CreatePage(ArticleDto pageDto)
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            if (!ModelState.IsValid)
             {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+                return BadRequest(ModelState);
+            }
+
+            var page = new Article
+            {
+                Id = pageDto.Id,
+                Title = pageDto.Title,
+                Author = pageDto.Author,
+                Body = pageDto.Body,
+            };
+
+            _dbContext.Articles.Add(page);
+            await _dbContext.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetPage), new { id = page.Id }, page);
+        }
+
+        [Authorize(Roles = "Admin, User")]
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<ArticleDto>> GetPage(int id)
+        {
+            var article = await _dbContext.Articles.FindAsync(id);
+
+            if (article is null)
+            {
+                return NotFound();
+            }
+
+            var pageDto = new ArticleDto
+            {
+                Id = article.Id,
+                Author = article.Author,
+                Body = article.Body,
+                Title = article.Title
+            };
+
+            return pageDto;
+        }
+
+        [Authorize(Roles = "Admin, User")]
+        [HttpGet]
+        public async Task<List<Article>> ListArticles()
+        {
+            var articlesFromDb = await _dbContext.Articles.ToListAsync();
+
+            return articlesFromDb;
         }
     }
 }
