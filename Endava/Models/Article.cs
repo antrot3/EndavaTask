@@ -10,6 +10,9 @@ namespace Endava.Models
         public int Id { get; set; }
         public string? Title { get; set; }
         public string? Body { get; set; }
-        public string? Author { get; set; }
+
+        [ForeignKey("User")]
+        public string UserId { get; set; }
+        public ApplicationUser Author { get; set; }
     }
 }

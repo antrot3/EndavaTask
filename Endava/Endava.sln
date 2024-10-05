@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Endava", "Endava.csproj", "{651C59DB-0828-4B26-B312-05BAF4CA06B2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceLayer", "..\ServiceLayer\ServiceLayer.csproj", "{2260C9E5-5E67-473A-8615-96AC3E7D80B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{651C59DB-0828-4B26-B312-05BAF4CA06B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{651C59DB-0828-4B26-B312-05BAF4CA06B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{651C59DB-0828-4B26-B312-05BAF4CA06B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2260C9E5-5E67-473A-8615-96AC3E7D80B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2260C9E5-5E67-473A-8615-96AC3E7D80B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2260C9E5-5E67-473A-8615-96AC3E7D80B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2260C9E5-5E67-473A-8615-96AC3E7D80B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

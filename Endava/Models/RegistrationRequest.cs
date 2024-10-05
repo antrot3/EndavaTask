@@ -14,6 +14,7 @@ namespace Endava.Models
         [Required]
         public string? Password { get; set; }
 
-        public Role Role { get; set; } = Role.User;
+        [Required]
+        public bool UserIsAdmin { get; set; }
     }
 }

@@ -37,10 +37,18 @@ public class UsersController : ControllerBase
             return BadRequest(ModelState);
         }
 
+        if (_context.Users.FirstOrDefault(x => x.UserName == request.Username) != null)
+            return BadRequest("User name already taken");
+
+        var userRole = Role.User;
+        if (request.UserIsAdmin)
+            userRole = Role.Admin;
+
         var result = await _userManager.CreateAsync(
-            new ApplicationUser { UserName = request.Username, Email = request.Email, Role = request.Role },
+            new ApplicationUser { UserName = request.Username, Email = request.Email, Role = userRole },
             request.Password!
         );
+
 
         if (result.Succeeded)
         {

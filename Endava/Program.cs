@@ -106,9 +106,7 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-// Build the app
 var app = builder.Build();
-
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
@@ -124,87 +122,3 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
-
-//var builder = WebApplication.CreateBuilder(args);
-
-//// Add services to the container.
-
-//builder.Services.AddControllers();
-//// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-//builder.Services.AddEndpointsApiExplorer();
-
-//builder.Services.AddSwaggerGen(options =>
-//{
-//    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-//    {
-//        In = ParameterLocation.Header,
-//        Description = "Please enter token",
-//        Name = "Authorization",
-//        Type = SecuritySchemeType.Http,
-//        BearerFormat = "JWT",
-//        Scheme = "bearer"
-//    });
-//    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-//{
-//    {
-//        new OpenApiSecurityScheme
-//        {
-//            Reference = new OpenApiReference
-//            {
-//                Type = ReferenceType.SecurityScheme,
-//                Id = "Bearer"
-//            }
-//        },
-//        new string[] { }
-//    }
-//});
-//});
-
-//builder.Services.AddDbContext<MyDbContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("DBCS")));
-
-//// Add database context
-
-//// Configure Identity
-//builder.Services.AddIdentity<User, IdentityRole>()
-//    .AddEntityFrameworkStores<MyDbContext>()
-//    .AddDefaultTokenProviders();
-
-//// Configure JWT Authentication
-//var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSuperSecretKey2131232132132132123213213213")); // Replace with your secret
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//})
-//.AddJwtBearer(options =>
-//{
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateIssuer = false,
-//        ValidateAudience = false,
-//        ValidateIssuerSigningKey = true,
-//        IssuerSigningKey = key
-//    };
-//});
-
-//var app = builder.Build();
-
-//// Configure the HTTP request pipeline.
-//using (var scope = app.Services.CreateScope())
-//{
-//    var services = scope.ServiceProvider;
-//    await SeedRoles(services);
-//}
-
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
-
-//app.UseAuthentication();
-//app.UseAuthorization();
-
-//app.MapControllers();
-
-//app.Run();
