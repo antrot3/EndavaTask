@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Endava.Enums;
-using Microsoft.AspNetCore.Identity;
-using Endava.Enums;
+using ServiceLayer.Enums;
 
-namespace Endava.Models
+namespace ServiceLayer.Models
 {
     public class ApplicationUser : IdentityUser
     {

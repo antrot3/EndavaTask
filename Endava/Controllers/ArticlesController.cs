@@ -1,11 +1,8 @@
-using Endava.Data;
-using Endava.Models;
-using Endava.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
+using ServiceLayer.Data;
+using ServiceLayer.Models;
+using ServiceLayer.Service.Interfaces;
 
 namespace Endava.Controllers
 {
@@ -13,11 +10,13 @@ namespace Endava.Controllers
     [Route("api/[controller]")]
     public class ArticlesController : ControllerBase
     {
+        private readonly IArticleService _articleService;
         private readonly ApplicationDbContext _dbContext;
 
-        public ArticlesController(ILogger<ArticlesController> logger, ApplicationDbContext dbContext)
+        public ArticlesController(ILogger<ArticlesController> logger, ApplicationDbContext dbContext, IArticleService articleService)
         {
             _dbContext = dbContext;
+            _articleService = articleService;
         }
 
         [Authorize(Roles = "Admin")]
@@ -25,101 +24,60 @@ namespace Endava.Controllers
         public async Task<ActionResult<ArticlesDto>> CreateArticle(ArticleCreateDto artilceDto)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
+            try
+            {
+                return await _articleService.CreateNewArticleAsync(artilceDto, User);
             }
-            var userName = User.Identity.Name;
-            var currentUser = _dbContext.Users.FirstOrDefault(x => x.UserName == userName);
-
-            if (currentUser == null)
-                return BadRequest("User can not be found");
-
-            var article = new Article
+            catch (Exception ex)
             {
-                Title = artilceDto.Title,
-                Author = currentUser,
-                Body = artilceDto.Body,
-            };
-            article.UserId = currentUser.Id;
-            _dbContext.Articles.Add(article);
-            await _dbContext.SaveChangesAsync();
-
-            return new ArticlesDto
-            {
-                Id = article.Id,
-                Author = article.Author.UserName,
-                Body = article.Body,
-                Title = article.Title
-            };
+                return BadRequest(ex.Message);
+            }
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost("edit")]
-        public async Task<ActionResult<ArticlesDto>> EditArticle( ArticleEditDto articleEditDto)
+        public async Task<ActionResult<ArticlesDto>> EditArticle(ArticleEditDto articleEditDto)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
-            var article = _dbContext.Articles.FirstOrDefault(x => x.Id == articleEditDto.ArticleId);
-            if (article == null)
-                return BadRequest("Article does not exits");
-
-            article.Title = articleEditDto.Title;
-            article.Body = articleEditDto.Body;
-            _dbContext.SaveChanges();
-            var author = _dbContext.Users.FirstOrDefault(x => x.Id == article.UserId);
-            return new ArticlesDto
+            try
             {
-                Id = article.Id,
-                Author = author.UserName,
-                Body = article.Body,
-                Title = article.Title
-            };
+                return _articleService.EditArticle(articleEditDto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [Authorize(Roles = "Admin, User")]
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ArticlesDto>> GetArticleById(int id)
         {
-            var article = await _dbContext.Articles.FindAsync(id);
-
-            if (article is null)
+            try
             {
-                return BadRequest("Article is not found");
+                return await _articleService.GetArticleByIdAsync(id);
             }
-            var author = _dbContext.Users.FirstOrDefault(x => x.Id == article.UserId);
-            var articlesDto = new ArticlesDto
+            catch (Exception ex)
             {
-                Id = article.Id,
-                Author = author.UserName,
-                Body = article.Body,
-                Title = article.Title
-            };
-
-            return articlesDto;
+                return BadRequest(ex.Message);
+            }
         }
 
         [Authorize(Roles = "Admin, User")]
         [HttpGet]
-        public async Task<List<ArticlesDto>> ListArticles()
+        public async Task<ActionResult<List<ArticlesDto>>> ListArticles()
         {
-            var articlesFromDb = await _dbContext.Articles.ToListAsync();
-            var articles = new List<ArticlesDto>();
-            foreach (var article in articlesFromDb)
+            try
             {
-                var author = _dbContext.Users.FirstOrDefault(x => x.Id == article.UserId);
-                var articlesDto = new ArticlesDto
-                {
-                    Id = article.Id,
-                    Author = author.UserName,
-                    Body = article.Body,
-                    Title = article.Title
-                };
-                articles.Add(articlesDto);
+                return await _articleService.GetAllArticlesAsync();
             }
-
-            return articles;
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
         }
+        
     }
 }

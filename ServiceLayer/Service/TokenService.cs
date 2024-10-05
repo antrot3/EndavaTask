@@ -2,10 +2,11 @@
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
-using Endava.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
+using ServiceLayer.Models;
+using Microsoft.Extensions.Configuration;
 
-namespace Endava.Services
+namespace ServiceLayer.Service
 {
     public class TokenService
     {

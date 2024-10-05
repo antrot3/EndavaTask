@@ -1,10 +1,8 @@
-﻿using Endava.Enums;
-using Endava.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using ServiceLayer.Models;
 
-namespace Endava.Data;
+namespace ServiceLayer.Data;
 
 public class ApplicationDbContext : IdentityUserContext<ApplicationUser>
 {

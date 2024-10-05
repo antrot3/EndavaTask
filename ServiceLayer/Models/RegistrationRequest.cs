@@ -1,7 +1,6 @@
-﻿using Endava.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Endava.Models
+namespace ServiceLayer.Models
 {
     public class RegistrationRequest
     {

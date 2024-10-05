@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace Endava.Models
+namespace ServiceLayer.Models
 {
     public class Article
     {

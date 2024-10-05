@@ -1,13 +1,9 @@
-﻿using Endava.Data;
-using Endava.Enums;
-using Endava.Models;
-using Endava.Services;
-using Endava.Data;
-using Endava.Enums;
-using Endava.Models;
-using Endava.Services;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using ServiceLayer.Data;
+using ServiceLayer.Enums;
+using ServiceLayer.Models;
+using ServiceLayer.Service;
 
 namespace Endava.Controllers;
 

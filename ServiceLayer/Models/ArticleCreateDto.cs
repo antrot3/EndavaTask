@@ -1,8 +1,7 @@
-﻿namespace Endava.Models
+﻿namespace ServiceLayer.Models
 {
-    public class ArticleEditDto
+    public class ArticleCreateDto
     {
-        public required int? ArticleId { get; set; }
         public required string? Title { get; set; }
         public required string? Body { get; set; }
     }

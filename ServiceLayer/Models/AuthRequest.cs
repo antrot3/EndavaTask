@@ -1,4 +1,4 @@
-﻿namespace Endava.Models
+﻿namespace ServiceLayer.Models
 {
     public class AuthRequest
     {

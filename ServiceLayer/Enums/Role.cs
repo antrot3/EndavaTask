@@ -1,4 +1,4 @@
-﻿namespace Endava.Enums
+﻿namespace ServiceLayer.Enums
 {
     public enum Role
     {
