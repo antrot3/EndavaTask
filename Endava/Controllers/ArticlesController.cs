@@ -43,7 +43,7 @@ namespace Endava.Controllers
         [HttpGet("DeleteArticle/{id:int}")]
         public async Task<ActionResult<ArticlesDto>> DeleteArticle(int id)
         {
-            return await HandleRequestAsync(() => _articleService.DeleteArticleByIdAsync(id), "GetArticleByIdAsync", id.ToString());
+            return await HandleRequestAsync(() => _articleService.DeleteArticleByIdAsync(id), "DeleteArticle", id.ToString());
         }
 
         [Authorize(Roles = "Admin, User")]
