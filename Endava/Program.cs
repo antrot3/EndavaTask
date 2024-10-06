@@ -53,6 +53,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(x => x.UseSqlServer(builder.
 
 
 builder.Services.AddTransient<ServiceLayer.Service.Interfaces.IArticleService, ArticleService>();
+builder.Services.AddTransient<ServiceLayer.Service.Interfaces.IDatabaseService, DatabaseService>();
+
 // Register our TokenService dependency
 builder.Services.AddScoped<TokenService, TokenService>();
 
@@ -71,8 +73,8 @@ builder.Services
         options.SignIn.RequireConfirmedAccount = false;
         options.User.RequireUniqueEmail = true;
         options.Password.RequireDigit = false;
-        options.Password.RequiredLength = 6;
-        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 8;
+        options.Password.RequireNonAlphanumeric = true;
         options.Password.RequireUppercase = false;
     })
     .AddRoles<IdentityRole>()
@@ -109,6 +111,13 @@ builder.Services.AddAuthentication(options =>
     });
 
 var app = builder.Build();
+
+// Apply migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())

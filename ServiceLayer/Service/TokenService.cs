@@ -31,13 +31,7 @@ namespace ServiceLayer.Service
             if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
                 throw new ArgumentException("Email and password are required");
 
-            var managedUser = await _userManager.FindByEmailAsync(request.Email);
-
-            if (managedUser == null)
-            {
-                throw new Exception("Invalid email or password");
-            }
-
+            var managedUser = await _userManager.FindByEmailAsync(request.Email) ?? throw new Exception("Invalid email or password");
             var isPasswordValid = await _userManager.CheckPasswordAsync(managedUser, request.Password);
 
             if (!isPasswordValid)
@@ -45,13 +39,7 @@ namespace ServiceLayer.Service
                 throw new Exception("Invalid email or password");
             }
 
-            var userInDb = _context.Users.FirstOrDefault(u => u.Email == request.Email);
-
-            if (userInDb == null)
-            {
-                throw new Exception("User not found");
-            }
-
+            var userInDb = _context.Users.FirstOrDefault(u => u.Email == request.Email) ?? throw new Exception("User not found");
             var accessToken = CreateToken(userInDb);
             await _context.SaveChangesAsync();
 
@@ -69,11 +57,7 @@ namespace ServiceLayer.Service
                 throw new Exception("Username already taken");
 
             var userRole = request.UserIsAdmin ? Role.Admin : Role.User;
-
-            var result = await _userManager.CreateAsync(
-                new ApplicationUser { UserName = request.Username, Email = request.Email, Role = userRole },
-                request.Password
-            );
+            var result = await _userManager.CreateAsync(new ApplicationUser { UserName = request.Username, Email = request.Email, Role = userRole },request.Password);
             return result;
         }
 

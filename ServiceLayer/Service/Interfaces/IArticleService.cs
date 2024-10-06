@@ -6,9 +6,9 @@ namespace ServiceLayer.Service.Interfaces
 {
     public interface IArticleService
     {
-        Task<ActionResult<ArticlesDto>> CreateNewArticleAsync(ArticleCreateDto artilceDto, ClaimsPrincipal user);
-        ActionResult<ArticlesDto> EditArticle(ArticleEditDto articleEditDto);
+        Task<ActionResult<ArticlesDto>> CreateNewArticleAsync(ArticleCreateDto articleDto, ClaimsPrincipal user);
+        Task<ActionResult<ArticlesDto>> EditArticleAsync(ArticleEditDto articleEditDto);
         Task<ActionResult<ArticlesDto>> GetArticleByIdAsync(int id);
-        Task<List<ArticlesDto>> GetAllArticlesAsync();
+        Task<ActionResult<List<ArticlesDto>>> GetAllArticlesAsync();
     }
 }

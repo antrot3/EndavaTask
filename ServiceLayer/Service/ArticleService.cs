@@ -1,5 +1,4 @@
 ﻿using Common.Models;
-using DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ServiceLayer.Service.Interfaces;
@@ -9,98 +8,159 @@ namespace ServiceLayer.Service
 {
     public class ArticleService : IArticleService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IDatabaseService _dbContextService;
 
-        public ArticleService(ApplicationDbContext context)
+        public ArticleService(IDatabaseService dbContextService)
         {
-            _context = context;
+            _dbContextService = dbContextService;
         }
+
         public async Task<ActionResult<ArticlesDto>> CreateNewArticleAsync(ArticleCreateDto articleDto, ClaimsPrincipal user)
         {
+            ValidateUserAndArticleDto(user, articleDto);
+
+            var currentUser = await GetCurrentUserAsync(user);
+            var article = CreateArticleEntity(articleDto, currentUser);
+
+            await SaveArticleAsync(article);
+
+            return await CreateArticleDto(article);
+        }
+
+        public async Task<ActionResult<ArticlesDto>> EditArticleAsync(ArticleEditDto articleEditDto)
+        {
+            ValidateArticleEditDto(articleEditDto);
+
+            var article = await GetArticleAndCheckIsItNull(articleEditDto.ArticleId.Value);
+            UpdateArticleEntity(article, articleEditDto);
+
+            await SaveChangesAsync();
+
+            return await CreateArticleDto(article);
+        }
+
+        public async Task<ActionResult<ArticlesDto>> GetArticleByIdAsync(int id)
+        {
+            ValidateArticleId(id);
+
+            var article = await GetArticleAndCheckIsItNull(id);
+
+            return await CreateArticleDto(article);
+        }
+
+        public async Task<ActionResult<List<ArticlesDto>>> GetAllArticlesAsync()
+        {
+            var articlesFromDb = await _dbContextService.GetAllArticlesAsync();
+            return articlesFromDb?.Select(article => CreateArticleDto(article).Result).ToList() ?? new List<ArticlesDto>();
+        }
+
+        private void ValidateUserAndArticleDto(ClaimsPrincipal user, ArticleCreateDto articleDto)
+        {
+            if (string.IsNullOrEmpty(user?.Identity?.Name))
+                throw new ArgumentException("User identity is invalid");
+
+            ValidateArticleDto(articleDto);
+        }
+
+        private void ValidateArticleDto(ArticleCreateDto articleDto)
+        {
+            if (articleDto == null)
+                throw new ArgumentNullException(nameof(articleDto));
+
+            if (string.IsNullOrEmpty(articleDto.Title) || string.IsNullOrEmpty(articleDto.Body))
+                throw new ArgumentException("Title and Body are required for an article");
+        }
+
+        private void ValidateArticleEditDto(ArticleEditDto articleEditDto)
+        {
+            if (articleEditDto == null || articleEditDto.ArticleId == null)
+                throw new ArgumentNullException(nameof(articleEditDto), "Article ID is required");
+
+            ValidateArticleDto(new ArticleCreateDto { Title = articleEditDto.Title, Body = articleEditDto.Body });
+        }
+
+        private void ValidateArticleId(int id)
+        {
+            if (id <= 0)
+                throw new ArgumentException("Invalid article ID");
+        }
+
+        private async Task<ApplicationUser> GetCurrentUserAsync(ClaimsPrincipal user)
+        {
             var userName = user.Identity?.Name;
-            var currentUser = await _context.Users.FirstOrDefaultAsync(x => x.UserName == userName);
+            var currentUser = await _dbContextService.GetCurrentUserAsync(userName);
 
-            if (currentUser == null)
-                throw new Exception("User not found");
+            if (currentUser == null || string.IsNullOrEmpty(currentUser.Id))
+                throw new Exception("User not found or invalid");
 
-            var article = new Article
+            return currentUser;
+        }
+
+        private Article CreateArticleEntity(ArticleCreateDto articleDto, ApplicationUser currentUser)
+        {
+            return new Article
             {
                 Title = articleDto.Title,
                 Author = currentUser,
                 Body = articleDto.Body,
                 UserId = currentUser.Id
             };
-
-            _context.Articles.Add(article);
-            await _context.SaveChangesAsync();
-
-            return new ArticlesDto
-            {
-                Id = article.Id,
-                Author = article.Author.UserName,
-                Body = article.Body,
-                Title = article.Title
-            };
         }
 
-        public ActionResult<ArticlesDto> EditArticle(ArticleEditDto articleEditDto)
+        private void UpdateArticleEntity(Article article, ArticleEditDto articleEditDto)
         {
-            var article = _context.Articles.FirstOrDefault(x => x.Id == articleEditDto.ArticleId);
-            if (article == null)
-                throw new Exception("Article does not exist");
-
             article.Title = articleEditDto.Title;
             article.Body = articleEditDto.Body;
-            _context.SaveChanges();
-
-            var author = _context.Users.FirstOrDefault(x => x.Id == article.UserId);
-            return new ArticlesDto
-            {
-                Id = article.Id,
-                Author = author?.UserName,
-                Body = article.Body,
-                Title = article.Title
-            };
         }
 
-        public async Task<ActionResult<ArticlesDto>> GetArticleByIdAsync(int id)
+        private async Task SaveArticleAsync(Article article)
         {
-            var article = await _context.Articles.FindAsync(id);
-
-            if (article is null)
+            try
             {
+                await _dbContextService.AddArticleAndSaveChangesAsync(article);
+            }
+            catch (DbUpdateException)
+            {
+                throw new Exception("Error saving article to the database");
+            }
+        }
+
+        private async Task SaveChangesAsync()
+        {
+            try
+            {
+                await _dbContextService.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                throw new Exception("Error saving changes to the database");
+            }
+        }
+
+        private async Task<Article> GetArticleAndCheckIsItNull(int id)
+        {
+            var article = await _dbContextService.GetArticleByIdAsync(id);
+
+            if (article == null)
                 throw new Exception("Article not found");
-            }
 
-            var author = await _context.Users.FirstOrDefaultAsync(x => x.Id == article.UserId);
+            return article;
+        }
+
+        private async Task<ArticlesDto> CreateArticleDto(Article article)
+        {
+            var author = await _dbContextService.GetUserByIdAsync(article.UserId);
+
+            if (author == null || string.IsNullOrEmpty(author.UserName))
+                throw new Exception("Author not found or invalid");
+
             return new ArticlesDto
             {
                 Id = article.Id,
-                Author = author?.UserName,
+                Author = author.UserName,
                 Body = article.Body,
                 Title = article.Title
             };
-        }
-
-        public async Task<List<ArticlesDto>> GetAllArticlesAsync()
-        {
-            var articlesFromDb = await _context.Articles.ToListAsync();
-            var articles = new List<ArticlesDto>();
-
-            foreach (var article in articlesFromDb)
-            {
-                var author = await _context.Users.FirstOrDefaultAsync(x => x.Id == article.UserId);
-                var articlesDto = new ArticlesDto
-                {
-                    Id = article.Id,
-                    Author = author?.UserName,
-                    Body = article.Body,
-                    Title = article.Title
-                };
-                articles.Add(articlesDto);
-            }
-
-            return articles;
         }
     }
 }

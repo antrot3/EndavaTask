@@ -10,16 +10,19 @@ namespace Endava.Controllers
     public class UsersController : ControllerBase
     {
         private readonly TokenService _tokenService;
+        private readonly ILogger<UsersController> _logger;
 
         public UsersController(TokenService tokenService, ILogger<UsersController> logger)
         {
             _tokenService = tokenService;
+            _logger = logger;
         }
 
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register(RegistrationRequest request)
         {
+            _logger.LogInformation($"Registration started for:{request.Username}");
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -37,7 +40,8 @@ namespace Endava.Controllers
                 {
                     ModelState.AddModelError(error.Code, error.Description);
                 }
-
+                
+                _logger.LogInformation($"Registration sucess");
                 return BadRequest(ModelState);
             }
             catch (Exception ex)
@@ -50,11 +54,14 @@ namespace Endava.Controllers
         [Route("authenticate")]
         public async Task<ActionResult<AuthResponse>> Authenticate([FromBody] AuthRequest request)
         {
+            _logger.LogInformation($"Authenticate started");
+
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             try
             {
+                _logger.LogInformation($"Authenticate sucess");
                 return await _tokenService.Authenticate(request);
             }
             catch (Exception ex)
@@ -66,6 +73,7 @@ namespace Endava.Controllers
         // Helper method to handle exceptions
         private ActionResult HandleException(Exception ex)
         {
+            _logger.LogError($"Exception message:{ex.Message}");
             return BadRequest(ex.Message);
         }
     }

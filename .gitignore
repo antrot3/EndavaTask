@@ -11,3 +11,5 @@
 /ServiceLayer/bin
 /ServiceLayer/bin/Debug
 /ServiceLayer/bin
+/ServiceLayerTest/obj
+/ServiceLayerTest/bin/Debug
