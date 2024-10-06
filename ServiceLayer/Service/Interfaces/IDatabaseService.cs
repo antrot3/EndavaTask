@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ServiceLayer.Service.Interfaces
 {
@@ -10,6 +11,7 @@ namespace ServiceLayer.Service.Interfaces
         Task<Article> GetArticleByFindIdAsync(int id);
         Task<ApplicationUser?> GetUserByIdAsync(string? userId);
         Task<List<Article>> GetAllArticlesAsync();
+        Task<Article> DeleteArticleByIdAsync(int articleId);
         Task SaveChangesAsync();
     }
 }

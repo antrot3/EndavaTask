@@ -40,6 +40,13 @@ namespace Endava.Controllers
         }
 
         [Authorize(Roles = "Admin, User")]
+        [HttpGet("DeleteArticle/{id:int}")]
+        public async Task<ActionResult<ArticlesDto>> DeleteArticle(int id)
+        {
+            return await HandleRequestAsync(() => _articleService.DeleteArticleByIdAsync(id), "GetArticleByIdAsync", id.ToString());
+        }
+
+        [Authorize(Roles = "Admin, User")]
         [HttpGet("GetAllArticlesAsync")]
         public async Task<ActionResult<List<ArticlesDto>>> GetAllArticlesAsync()
         {

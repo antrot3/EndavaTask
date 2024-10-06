@@ -1,5 +1,6 @@
 ﻿using Common.Models;
 using DAL;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ServiceLayer.Service.Interfaces;
 
@@ -28,6 +29,17 @@ namespace ServiceLayer.Service
         public async Task<Article> GetArticleByIdAsync(int? articleId)
         {
             return await _context.Articles.FirstOrDefaultAsync(x => x.Id == articleId);
+        }
+
+        public async Task<Article> DeleteArticleByIdAsync(int articleId)
+        {
+            var article = await _context.Articles.FindAsync(articleId);
+            if (article == null)
+                throw new ArgumentException("Invalid article ID");
+
+            _context.Articles.Remove(article);
+            await _context.SaveChangesAsync();
+            return article;
         }
 
         public async Task<Article> GetArticleByFindIdAsync(int id)

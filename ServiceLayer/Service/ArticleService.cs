@@ -48,6 +48,13 @@ namespace ServiceLayer.Service
             return await CreateArticleDto(article);
         }
 
+        public async Task<ActionResult<ArticlesDto>> DeleteArticleByIdAsync(int id)
+        {
+            ValidateArticleId(id);
+
+            return await CreateArticleDto(await _dbContextService.DeleteArticleByIdAsync(id));
+        }
+
         public async Task<ActionResult<List<ArticlesDto>>> GetAllArticlesAsync()
         {
             var articlesFromDb = await _dbContextService.GetAllArticlesAsync();

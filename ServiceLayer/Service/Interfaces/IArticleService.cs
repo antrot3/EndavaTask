@@ -10,5 +10,6 @@ namespace ServiceLayer.Service.Interfaces
         Task<ActionResult<ArticlesDto>> EditArticleAsync(ArticleEditDto articleEditDto);
         Task<ActionResult<ArticlesDto>> GetArticleByIdAsync(int id);
         Task<ActionResult<List<ArticlesDto>>> GetAllArticlesAsync();
+        Task<ActionResult<ArticlesDto>> DeleteArticleByIdAsync(int id);
     }
 }
