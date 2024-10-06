@@ -1,4 +1,4 @@
-﻿namespace ServiceLayer.Enums
+﻿namespace Common.Enums
 {
     public enum Role
     {

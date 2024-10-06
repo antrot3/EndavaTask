@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using ServiceLayer.Enums;
+using Common.Enums;
 
-namespace ServiceLayer.Models
+namespace Common.Models
 {
     public class ApplicationUser : IdentityUser
     {

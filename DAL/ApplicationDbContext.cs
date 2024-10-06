@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Common.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using ServiceLayer.Models;
 
-namespace ServiceLayer.Data;
+
+namespace DAL;
 
 public class ApplicationDbContext : IdentityUserContext<ApplicationUser>
 {

@@ -1,4 +1,4 @@
-﻿namespace ServiceLayer.Models
+﻿namespace Common.Models
 {
     public class ArticleEditDto
     {

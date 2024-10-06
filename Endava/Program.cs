@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using ServiceLayer.Data;
-using ServiceLayer.Models;
+using DAL;
+using Common.Models;
 using ServiceLayer.Service;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -52,7 +52,6 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddDbContext<ApplicationDbContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("DBCS")));
 
 
-builder.Services.AddTransient<ServiceLayer.Service.Interfaces.IUserService, UserService>();
 builder.Services.AddTransient<ServiceLayer.Service.Interfaces.IArticleService, ArticleService>();
 // Register our TokenService dependency
 builder.Services.AddScoped<TokenService, TokenService>();

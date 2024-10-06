@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace ServiceLayer.Models
+namespace Common.Models
 {
     public class Article
     {

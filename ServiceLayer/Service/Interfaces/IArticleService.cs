@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ServiceLayer.Models;
+using Common.Models;
 using System.Security.Claims;
 
 namespace ServiceLayer.Service.Interfaces

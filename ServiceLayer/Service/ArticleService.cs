@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Common.Models;
+using DAL;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ServiceLayer.Data;
-using ServiceLayer.Models;
 using ServiceLayer.Service.Interfaces;
 using System.Security.Claims;
 
@@ -16,22 +15,22 @@ namespace ServiceLayer.Service
         {
             _context = context;
         }
-
-        public async Task<ActionResult<ArticlesDto>> CreateNewArticleAsync(ArticleCreateDto artilceDto, ClaimsPrincipal user)
+        public async Task<ActionResult<ArticlesDto>> CreateNewArticleAsync(ArticleCreateDto articleDto, ClaimsPrincipal user)
         {
-            var userName = user.Identity.Name;
-            var currentUser = _context.Users.FirstOrDefault(x => x.UserName == userName);
+            var userName = user.Identity?.Name;
+            var currentUser = await _context.Users.FirstOrDefaultAsync(x => x.UserName == userName);
 
             if (currentUser == null)
                 throw new Exception("User not found");
 
             var article = new Article
             {
-                Title = artilceDto.Title,
+                Title = articleDto.Title,
                 Author = currentUser,
-                Body = artilceDto.Body,
+                Body = articleDto.Body,
+                UserId = currentUser.Id
             };
-            article.UserId = currentUser.Id;
+
             _context.Articles.Add(article);
             await _context.SaveChangesAsync();
 
@@ -53,11 +52,12 @@ namespace ServiceLayer.Service
             article.Title = articleEditDto.Title;
             article.Body = articleEditDto.Body;
             _context.SaveChanges();
+
             var author = _context.Users.FirstOrDefault(x => x.Id == article.UserId);
             return new ArticlesDto
             {
                 Id = article.Id,
-                Author = author.UserName,
+                Author = author?.UserName,
                 Body = article.Body,
                 Title = article.Title
             };
@@ -69,18 +69,38 @@ namespace ServiceLayer.Service
 
             if (article is null)
             {
-                throw new Exception("Article is not found");
+                throw new Exception("Article not found");
             }
-            var author = _context.Users.FirstOrDefault(x => x.Id == article.UserId);
-            var articlesDto = new ArticlesDto
+
+            var author = await _context.Users.FirstOrDefaultAsync(x => x.Id == article.UserId);
+            return new ArticlesDto
             {
                 Id = article.Id,
-                Author = author.UserName,
+                Author = author?.UserName,
                 Body = article.Body,
                 Title = article.Title
             };
+        }
 
-            return articlesDto;
+        public async Task<List<ArticlesDto>> GetAllArticlesAsync()
+        {
+            var articlesFromDb = await _context.Articles.ToListAsync();
+            var articles = new List<ArticlesDto>();
+
+            foreach (var article in articlesFromDb)
+            {
+                var author = await _context.Users.FirstOrDefaultAsync(x => x.Id == article.UserId);
+                var articlesDto = new ArticlesDto
+                {
+                    Id = article.Id,
+                    Author = author?.UserName,
+                    Body = article.Body,
+                    Title = article.Title
+                };
+                articles.Add(articlesDto);
+            }
+
+            return articles;
         }
     }
 }

@@ -1,10 +1,14 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using Common.Enums;
+using Common.Models;
+using DAL;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.Extensions.Logging;
-using ServiceLayer.Models;
-using Microsoft.Extensions.Configuration;
 
 namespace ServiceLayer.Service
 {
@@ -12,10 +16,65 @@ namespace ServiceLayer.Service
     {
         private const int ExpirationMinutes = 60;
         private readonly ILogger<TokenService> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationDbContext _context;
 
-        public TokenService(ILogger<TokenService> logger)
+        public TokenService(ILogger<TokenService> logger, UserManager<ApplicationUser> userManager, ApplicationDbContext context)
         {
             _logger = logger;
+            _userManager = userManager;
+            _context = context;
+        }
+
+        public async Task<ActionResult<AuthResponse>> Authenticate(AuthRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+                throw new ArgumentException("Email and password are required");
+
+            var managedUser = await _userManager.FindByEmailAsync(request.Email);
+
+            if (managedUser == null)
+            {
+                throw new Exception("Invalid email or password");
+            }
+
+            var isPasswordValid = await _userManager.CheckPasswordAsync(managedUser, request.Password);
+
+            if (!isPasswordValid)
+            {
+                throw new Exception("Invalid email or password");
+            }
+
+            var userInDb = _context.Users.FirstOrDefault(u => u.Email == request.Email);
+
+            if (userInDb == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            var accessToken = CreateToken(userInDb);
+            await _context.SaveChangesAsync();
+
+            return new AuthResponse
+            {
+                Username = userInDb.UserName,
+                Email = userInDb.Email,
+                Token = accessToken,
+            };
+        }
+
+        public async Task<IdentityResult> Register(RegistrationRequest request)
+        {
+            if (_context.Users.Any(x => x.UserName == request.Username))
+                throw new Exception("Username already taken");
+
+            var userRole = request.UserIsAdmin ? Role.Admin : Role.User;
+
+            var result = await _userManager.CreateAsync(
+                new ApplicationUser { UserName = request.Username, Email = request.Email, Role = userRole },
+                request.Password
+            );
+            return result;
         }
 
         public string CreateToken(ApplicationUser user)

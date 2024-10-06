@@ -1,7 +1,7 @@
+using Common.Models;
+using DAL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ServiceLayer.Data;
-using ServiceLayer.Models;
 using ServiceLayer.Service.Interfaces;
 
 namespace Endava.Controllers
@@ -19,35 +19,38 @@ namespace Endava.Controllers
             _articleService = articleService;
         }
 
+
         [Authorize(Roles = "Admin")]
-        [HttpPost("new")]
-        public async Task<ActionResult<ArticlesDto>> CreateArticle(ArticleCreateDto artilceDto)
+        [HttpPost("CreateArticle")]
+        public async Task<ActionResult<ArticlesDto>> CreateArticle(ArticleCreateDto articleDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
             try
             {
-                return await _articleService.CreateNewArticleAsync(artilceDto, User);
+                return await _articleService.CreateNewArticleAsync(articleDto, User);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return HandleException(ex);
             }
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPost("edit")]
-        public async Task<ActionResult<ArticlesDto>> EditArticle(ArticleEditDto articleEditDto)
+        [HttpPost("EditArticle")]
+        public ActionResult<ArticlesDto> EditArticle(ArticleEditDto articleEditDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
             try
             {
                 return _articleService.EditArticle(articleEditDto);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return HandleException(ex);
             }
         }
 
@@ -61,7 +64,7 @@ namespace Endava.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return HandleException(ex);
             }
         }
 
@@ -75,9 +78,12 @@ namespace Endava.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return HandleException(ex);
             }
         }
-        
+        private ActionResult HandleException(Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }
